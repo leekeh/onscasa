@@ -1,34 +1,34 @@
-import { google, Auth } from "googleapis";
+import { googleAuthToken, googleAuthExpiration } from "@store";
+import { get } from "svelte/store";
 
-export const getGoogleAuthToken = async () => {
-  /**
-   * To use OAuth2 authentication, we need access to a CLIENT_ID, CLIENT_SECRET, AND REDIRECT_URI
-   * from the client_secret.json file. To get these credentials for your application, visit
-   * https://console.cloud.google.com/apis/credentials.
-   */
-  const oauth2Client = new google.auth.OAuth2(
-    import.meta.env.VITE_GOOGLE_CLIENT_ID,
-    import.meta.env.VITE_GOOGLE_CLIENT_SECRET,
-    import.meta.env.VITE_HOSTURL
-  );
+const storeAuth = () => {
+  const accesToken = window.location.hash.split("&")[0].split("=")[1];
+  googleAuthToken.set(accesToken);
+  const expiresIn = +window.location.hash.split("&")[2].split("=")[1];
+  googleAuthExpiration.set(new Date(new Date().getTime() + expiresIn * 1000));
+  window.location.replace(import.meta.env.VITE_HOSTURL);
+};
 
+const redirToAuth = () => {
   // Scopes must match the scopes configured in the Google Developers Console.
-  const scopes = ["https://www.googleapis.com/auth/photoslibrary.readonly"];
+  const scopes = [
+    "https://www.googleapis.com/auth/photoslibrary.readonly",
+  ].join("_");
+  const authorizationUrl =
+    "https://accounts.google.com/o/oauth2/v2/auth" +
+    `?scope=${scopes}` +
+    `&include_granted_scopes=true` +
+    `&response_type=token` +
+    `&redirect_uri=${import.meta.env.VITE_HOSTURL}` +
+    `&client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID}`;
+  window.location.assign(authorizationUrl);
+};
 
-  // Generate a url that asks permissions for the Drive activity scope
-  const authorizationUrl = oauth2Client.generateAuthUrl({
-    // 'online' (default) or 'offline' (gets refresh_token)
-    access_type: "offline",
-    /** Pass in the scopes array defined above.
-     * Alternatively, if only one scope is needed, you can pass a scope URL as a string */
-    scope: scopes,
-    // Enable incremental authorization. Recommended as a best practice.
-    include_granted_scopes: true,
-  });
-  try {
-    window.location.replace(authorizationUrl);
-    //TODO get the authorization token after redir
-  } catch (e) {
-    return "error";
+export const getGoogleAuthToken = () => {
+  //If we just came back from a redirect, store the result
+  if (window.location.hash) {
+    storeAuth();
+  } else if (!get(googleAuthToken) || get(googleAuthExpiration) < new Date()) {
+    redirToAuth();
   }
 };
