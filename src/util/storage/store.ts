@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
 
-function createStore<T>(key: string, initialValue?: T | null) {
+export function genericStore<T>(key: string, initialValue?: T | null) {
   // Get the value from localStorage if it exists
   const cachedValue = localStorage.getItem(key);
   const initial = cachedValue ? JSON.parse(cachedValue) : initialValue;
@@ -21,6 +21,7 @@ function createStore<T>(key: string, initialValue?: T | null) {
   };
 }
 
-// This should be stored in a secure storage
-export const storedAccessToken = createStore<string>("access_token", null);
-export const storedRefreshToken = createStore<string>("refresh_token", null);
+// TODO: This should be stored in a secure storage
+export function secureStore<T>(key: string, initialValue?: T | null) {
+  return genericStore(key, initialValue);
+}

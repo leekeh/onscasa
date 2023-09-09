@@ -1,11 +1,13 @@
-import { storedAccessToken, storedRefreshToken } from "@store";
+import { secureStore } from "@storage";
 import { get } from "svelte/store";
+
+const storedAccessToken = secureStore<string>("access_token", null);
+const storedRefreshToken = secureStore<string>("refresh_token", null);
 
 // Scopes must match the scopes configured in the Google Developers Console.
 const SCOPES = [
   "https://www.googleapis.com/auth/photoslibrary.readonly",
 ].join("_");
-
 
 interface AuthenticationResponse {
   accessToken: string,
@@ -13,6 +15,7 @@ interface AuthenticationResponse {
 };
 
 const save = (accessToken: string, refreshToken: string) => {
+  console.log(`Saving access_token:(${accessToken}), refresh_token:(${refreshToken})`);
   storedAccessToken.set(accessToken);
   storedRefreshToken.set(refreshToken);
 };
@@ -54,44 +57,50 @@ const authorizate = () => {
 };
 
 const processAuthorizationCode = (params: string): (string|null) => {
-  const code = new URLSearchParams(params).get("code")
+  const code = new URLSearchParams(params).get("code");
 
   if (code) {
-    return encodeURI(code)
+    return encodeURI(code);
   }
 
   return null;
 };
 
 const hasAuthorizationError = (params: string): boolean => {
-  return new URLSearchParams(params).get("error") !== null
+  return new URLSearchParams(params).get("error") !== null;
 }
 
 const hasAuthorizationSuccess = (params: string): boolean => {
-  return processAuthorizationCode(params) !== null
+  return processAuthorizationCode(params) !== null;
 }
 
-export const getGoogleAuthToken = () => {
+export const login = () => {
   if (hasAuthorizationError(window.location.search)) {
     console.log("User refused to authorizate :(");
-    return
+    return;
   }
 
-  if (!get(storedAccessToken) && !hasAuthorizationSuccess(window.location.search)) {
+  if (!isLoggedIn() && !hasAuthorizationSuccess(window.location.search)) {
+    console.log("Asking for user to authorization our app...");
     authorizate();
-    return
+    return;
   }
 
   const authorizationCode = processAuthorizationCode(window.location.search)
+  if (authorizationCode === null) return;
 
   authenticate(authorizationCode)
     .then((tokens) => {
-      save(tokens.accessToken, tokens.refreshToken);
-      // Redirect for now breaks the exchange between the authorization code and access token.
-      // If you want to test it just navigate back to the root yourself
-      // window.location.replace(import.meta.env.VITE_HOSTURL);
+      if (tokens.accessToken != undefined) {
+        save(tokens.accessToken, tokens.refreshToken);
+        window.location.replace(import.meta.env.VITE_HOSTURL);
+      }
     })
     .catch((exception) => {
       console.log(`Failed to exchange authorization for authentication token ${exception}`);
     });
 };
+
+export const isLoggedIn = (): boolean => get(storedAccessToken) !== null;
+
+export const token = () => get(storedAccessToken);
