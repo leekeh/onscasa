@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Background } from "@components";
-  import { initializeGoogleLogin } from "@authentication";
+  import { initializeGoogleLogin } from "@auth";
   import { onMount } from "svelte";
 
   let src = "";
