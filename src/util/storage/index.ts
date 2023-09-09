@@ -1,1 +1,1 @@
-export { genericStore, secureStore } from "./store";
+export { createGenericStore, createSecureStore } from "./store";

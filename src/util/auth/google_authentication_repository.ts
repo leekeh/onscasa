@@ -1,8 +1,8 @@
-import { secureStore } from "@storage";
+import { createSecureStore } from "@storage";
 import { get } from "svelte/store";
 
-const storedAccessToken = secureStore<string>("access_token", null);
-const storedRefreshToken = secureStore<string>("refresh_token", null);
+const storedAccessToken = createSecureStore<string>("access_token", null);
+const storedRefreshToken = createSecureStore<string>("refresh_token", null);
 
 // Scopes must match the scopes configured in the Google Developers Console.
 const SCOPES = [
@@ -43,7 +43,7 @@ const authenticate = async (authorizationCode: string): Promise<AuthenticationRe
   };
 };
 
-const authorizate = () => {
+const requestAuthorizationCode = () => {
   const authorizationURL = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   authorizationURL.searchParams.append("client_id", `${import.meta.env.VITE_GOOGLE_CLIENT_ID}`);
   authorizationURL.searchParams.append("redirect_uri", `${import.meta.env.VITE_HOSTURL}`);
@@ -72,13 +72,13 @@ const hasAuthorizationSuccess = (params: string): boolean => processAuthorizatio
 
 export const login = () => {
   if (hasAuthorizationError(window.location.search)) {
-    console.log("User refused to authorizate :(");
+    console.log("User refused to authenticate :(");
     return;
   }
 
   if (!isLoggedIn() && !hasAuthorizationSuccess(window.location.search)) {
-    console.log("Asking for user to authorization our app...");
-    authorizate();
+    console.log("Asking for user authenticate to our app...");
+    requestAuthorizationCode();
     return;
   }
 
