@@ -21,8 +21,6 @@ function createStore<T>(key: string, initialValue?: T | null) {
   };
 }
 
-export const googleAuthToken = createStore<string>("googleAuthToken", null);
-export const googleAuthExpiration = createStore<Date>(
-  "googleAuthExpiration",
-  null
-);
+// This should be stored in a secure storage
+export const storedAccessToken = createStore<string>("access_token", null);
+export const storedRefreshToken = createStore<string>("refresh_token", null);
