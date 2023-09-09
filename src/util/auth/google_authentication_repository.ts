@@ -66,13 +66,9 @@ const processAuthorizationCode = (params: string): (string|null) => {
   return null;
 };
 
-const hasAuthorizationError = (params: string): boolean => {
-  return new URLSearchParams(params).get("error") !== null;
-}
+const hasAuthorizationError = (params: string): boolean => new URLSearchParams(params).get("error") !== null;
 
-const hasAuthorizationSuccess = (params: string): boolean => {
-  return processAuthorizationCode(params) !== null;
-}
+const hasAuthorizationSuccess = (params: string): boolean => processAuthorizationCode(params) !== null;
 
 export const login = () => {
   if (hasAuthorizationError(window.location.search)) {

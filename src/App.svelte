@@ -1,12 +1,12 @@
 <script lang="ts">
   import { Background } from "@components";
-  import { login } from "@authentication";
+  import { initializeGoogleLogin } from "@authentication";
   import { onMount } from "svelte";
 
   let src = "";
 
   onMount(async () => {
-    login();
+    initializeGoogleLogin();
   });
 </script>
 
