@@ -11,7 +11,7 @@
     "paths": {
       "@components": ["./src/components/"],
       "@icons": ["./src/icons/"],
-      "@authentication": ["./src/util/auth/"],
+      "@auth": ["./src/util/auth/"],
       "@storage": ["./src/util/storage/"]
     }
   },

@@ -1,4 +1,4 @@
-import { googleToken } from "@authentication";
+import { googleToken } from "@auth";
 
 type Data = {
   mediaItems: {
