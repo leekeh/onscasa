@@ -23,7 +23,7 @@ type Data = {
   }[];
 };
 
-export const getSources = async () => {
+export const getSources = async (): Promise<Array<string>> => {
   const response = await fetch(
     "https://photoslibrary.googleapis.com/v1/mediaItems:search",
     {

@@ -14,7 +14,7 @@ interface AuthenticationResponse {
   refreshToken: string
 };
 
-const save = (accessToken: string, refreshToken: string) => {
+const save = (accessToken: string, refreshToken: string): void => {
   console.log(`Saving access token & refresh token...`);
   storedAccessToken.set(accessToken);
   storedRefreshToken.set(refreshToken);
@@ -43,7 +43,7 @@ const authenticate = async (authorizationCode: string): Promise<AuthenticationRe
   };
 };
 
-const requestAuthorizationCode = () => {
+const requestAuthorizationCode = (): void => {
   const authorizationURL = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   authorizationURL.searchParams.append("client_id", `${import.meta.env.VITE_GOOGLE_CLIENT_ID}`);
   authorizationURL.searchParams.append("redirect_uri", `${import.meta.env.VITE_HOSTURL}`);
@@ -70,7 +70,7 @@ const hasAuthorizationError = (params: string): boolean => new URLSearchParams(p
 
 const hasAuthorizationSuccess = (params: string): boolean => processAuthorizationCode(params) !== null;
 
-export const login = () => {
+export const login = (): void => {
   if (hasAuthorizationError(window.location.search)) {
     console.log("User refused to authenticate :(");
     return;
@@ -99,4 +99,4 @@ export const login = () => {
 
 export const isLoggedIn = (): boolean => get(storedAccessToken) !== null;
 
-export const token = () => get(storedAccessToken);
+export const token = (): string => get(storedAccessToken);
