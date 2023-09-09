@@ -15,12 +15,12 @@ interface AuthenticationResponse {
 };
 
 const save = (accessToken: string, refreshToken: string) => {
-  console.log(`Saving access_token:(${accessToken}), refresh_token:(${refreshToken})`);
+  console.log(`Saving access token & refresh token...`);
   storedAccessToken.set(accessToken);
   storedRefreshToken.set(refreshToken);
 };
 
-const authenticate = async (authorizationCode: string): AuthenticationResponse => {
+const authenticate = async (authorizationCode: string): Promise<AuthenticationResponse> => {
   const authenticationURL = new URL("https://oauth2.googleapis.com/token");
   authenticationURL.searchParams.append("client_id", `${import.meta.env.VITE_GOOGLE_CLIENT_ID}`);
   authenticationURL.searchParams.append("client_secret", `${import.meta.env.VITE_GOOGLE_CLIENT_SECRET}`);
