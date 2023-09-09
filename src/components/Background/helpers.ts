@@ -1,5 +1,4 @@
-import { storedAccessToken } from "@store";
-import { get } from "svelte/store";
+import { token } from "@authentication";
 
 type Data = {
   mediaItems: {
@@ -30,7 +29,7 @@ export const getSources = async () => {
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${get(storedAccessToken)}`,
+        Authorization: `Bearer ${token()}`,
       },
       body: JSON.stringify({
         filters: {
