@@ -1,4 +1,4 @@
-import { googleAuthToken } from "@store";
+import { storedAccessToken } from "@store";
 import { get } from "svelte/store";
 
 type Data = {
@@ -30,7 +30,7 @@ export const getSources = async () => {
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${get(googleAuthToken)}`,
+        Authorization: `Bearer ${get(storedAccessToken)}`,
       },
       body: JSON.stringify({
         filters: {
