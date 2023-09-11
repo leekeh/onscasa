@@ -109,7 +109,7 @@ export const processLoginResponse = async (): Promise<void> => {
   console.log(`Failed to exchange authorization for authentication token`);
 };
 
-export const isLoggedIn = (): boolean => get(storedAccessToken) !== null;
+export const isLoggedIn = (): boolean => token() !== null;
 
 export const refreshToken = async (): Promise<Result<void>> => {
   const refreshToken = get(storedRefreshToken);
