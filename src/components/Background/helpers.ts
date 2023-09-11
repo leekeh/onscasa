@@ -1,4 +1,4 @@
-import { googleToken } from "@auth";
+import { GoogleToken } from "@auth";
 
 type Data = {
   mediaItems: {
@@ -29,7 +29,7 @@ export const getSources = async (): Promise<Array<string>> => {
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${googleToken()}`,
+        Authorization: `Bearer ${GoogleToken()}`,
       },
       body: JSON.stringify({
         filters: {
