@@ -29,7 +29,7 @@ const authenticate = async (
     ["redirect_uri", import.meta.env.VITE_HOSTURL],
   ]);
 
-  for (let [key, value] of params) {
+  for (const [key, value] of params) {
     url.searchParams.append(key, value);
   }
 
@@ -60,7 +60,7 @@ const requestAuthorizationCode = (): void => {
     ["include_granted_scopes", "true"],
   ]);
 
-  for (let [key, value] of params) {
+  for (const [key, value] of params) {
     url.searchParams.append(key, value);
   }
 
