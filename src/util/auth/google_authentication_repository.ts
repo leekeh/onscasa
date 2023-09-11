@@ -21,17 +21,13 @@ const authenticate = async (
   authorizationCode: string
 ): Promise<AuthenticationResponse> => {
   const url = new URL("https://oauth2.googleapis.com/token");
-  const params = new Map<string, string>([
-    ["client_id", import.meta.env.VITE_GOOGLE_CLIENT_ID],
-    ["client_secret", import.meta.env.VITE_GOOGLE_CLIENT_SECRET],
-    ["code", authorizationCode],
-    ["grant_type", "authorization_code"],
-    ["redirect_uri", import.meta.env.VITE_HOSTURL],
-  ]);
-
-  for (const [key, value] of params) {
-    url.searchParams.append(key, value);
-  }
+  Object.entries({
+    client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+    client_secret: import.meta.env.VITE_GOOGLE_CLIENT_SECRET,
+    redirect_uri: import.meta.env.VITE_HOSTURL,
+    code: authorizationCode,
+    grant_type: "authorization_code",
+  }).forEach(([key, value]) => url.searchParams.append(key, value));
 
   const response = await fetch(url, {
     method: "POST",
@@ -50,19 +46,15 @@ const authenticate = async (
 
 const requestAuthorizationCode = (): void => {
   const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-  const params = new Map<string, string>([
-    ["client_id", import.meta.env.VITE_GOOGLE_CLIENT_ID],
-    ["redirect_uri", import.meta.env.VITE_HOSTURL],
-    ["response_type", "code"],
-    ["scope", SCOPES],
-    ["access_type", "offline"],
-    ["prompt", "consent"],
-    ["include_granted_scopes", "true"],
-  ]);
-
-  for (const [key, value] of params) {
-    url.searchParams.append(key, value);
-  }
+  Object.entries({
+    client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+    redirect_uri: import.meta.env.VITE_HOSTURL,
+    response_type: "code",
+    scope: SCOPES,
+    access_type: "offline",
+    prompt: "consent",
+    include_granted_scopes: true,
+  }).forEach(([key, value]) => url.searchParams.append(key, value));
 
   window.location.assign(url);
 };
