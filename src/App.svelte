@@ -1,18 +1,26 @@
 <script lang="ts">
   import { Background } from "@components";
-  import { initializeGoogleLogin } from "@auth";
+  import {
+    loginIntoGoogleAccount,
+    isLoggedIntoGoogleAccount,
+    processGoogleAccountLogin,
+  } from "@auth";
   import { onMount } from "svelte";
 
-  let src = "";
-
   onMount(async () => {
-    initializeGoogleLogin();
+    processGoogleAccountLogin();
   });
+
+  $: isLoggedIn = isLoggedIntoGoogleAccount();
 </script>
 
 <main>
-  <p>Cool shit will go here</p>
-  <Background />
+  {#if isLoggedIn}
+    <Background />
+  {:else}
+    <p>You are currently logged out :(</p>
+    <button on:click={loginIntoGoogleAccount}>Login</button>
+  {/if}
 </main>
 
 <style>

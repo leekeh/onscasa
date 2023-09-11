@@ -86,15 +86,13 @@ const requestAccessToken = async (code: string): Promise<Result<void>> => {
   }
 };
 
-export const login = async (): Promise<void> => {
+export const login = (): void => {
+  requestAuthorizationCode();
+};
+
+export const processLoginResponse = async (): Promise<void> => {
   if (hasAuthorizationError(window.location.search)) {
     console.log("User refused to authenticate :(");
-    return;
-  }
-
-  if (!isLoggedIn() && !hasAuthorizationSuccess(window.location.search)) {
-    console.log("Asking for user authenticate to our app...");
-    requestAuthorizationCode();
     return;
   }
 
