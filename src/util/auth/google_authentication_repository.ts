@@ -1,5 +1,7 @@
 import { createSecureStore } from "@storage";
 import { get } from "svelte/store";
+import type { AuthenticationResponse } from "./dtos/AuthenticationResponse";
+import { Result, Failure, Success } from "@util";
 
 const storedAccessToken = createSecureStore<string>("access_token", null);
 const storedRefreshToken = createSecureStore<string>("refresh_token", null);
@@ -8,11 +10,6 @@ const storedRefreshToken = createSecureStore<string>("refresh_token", null);
 const SCOPES = ["https://www.googleapis.com/auth/photoslibrary.readonly"].join(
   "_"
 );
-
-interface AuthenticationResponse {
-  accessToken: string;
-  refreshToken: string;
-}
 
 const save = (accessToken: string, refreshToken: string): void => {
   console.log(`Saving access token & refresh token...`);
@@ -23,19 +20,20 @@ const save = (accessToken: string, refreshToken: string): void => {
 const authenticate = async (
   authorizationCode: string
 ): Promise<AuthenticationResponse> => {
-  const authenticationURL = new URL("https://oauth2.googleapis.com/token");
-  authenticationURL.search = Object.keys({
-    client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-    client_secret: import.meta.env.VITE_GOOGLE_CLIENT_SECRET,
-    code: authorizationCode,
-    grant_type: "authorization_code",
-    redirect_uri: import.meta.env.VITE_HOSTURL,
-  })
-    .map((key, val) => `${key}=${val}`)
-    .join("&");
-  console.log(authenticationURL);
+  const url = new URL("https://oauth2.googleapis.com/token");
+  const params = new Map<string, string>([
+    ["client_id", import.meta.env.VITE_GOOGLE_CLIENT_ID],
+    ["client_secret", import.meta.env.VITE_GOOGLE_CLIENT_SECRET],
+    ["code", authorizationCode],
+    ["grant_type", "authorization_code"],
+    ["redirect_uri", import.meta.env.VITE_HOSTURL],
+  ]);
 
-  const response = await fetch(authenticationURL, {
+  for (let [key, value] of params) {
+    url.searchParams.append(key, value);
+  }
+
+  const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -51,34 +49,28 @@ const authenticate = async (
 };
 
 const requestAuthorizationCode = (): void => {
-  const authorizationURL = new URL(
-    "https://accounts.google.com/o/oauth2/v2/auth"
-  );
-  authorizationURL.searchParams.append(
-    "client_id",
-    `${import.meta.env.VITE_GOOGLE_CLIENT_ID}`
-  );
-  authorizationURL.searchParams.append(
-    "redirect_uri",
-    `${import.meta.env.VITE_HOSTURL}`
-  );
-  authorizationURL.searchParams.append("response_type", "code");
-  authorizationURL.searchParams.append("scope", `${SCOPES}`);
-  authorizationURL.searchParams.append("access_type", "offline");
-  authorizationURL.searchParams.append("prompt", "consent");
-  authorizationURL.searchParams.append("include_granted_scopes", "true");
+  const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+  const params = new Map<string, string>([
+    ["client_id", import.meta.env.VITE_GOOGLE_CLIENT_ID],
+    ["redirect_uri", import.meta.env.VITE_HOSTURL],
+    ["response_type", "code"],
+    ["scope", SCOPES],
+    ["access_type", "offline"],
+    ["prompt", "consent"],
+    ["include_granted_scopes", "true"],
+  ]);
 
-  window.location.assign(authorizationURL);
+  for (let [key, value] of params) {
+    url.searchParams.append(key, value);
+  }
+
+  window.location.assign(url);
 };
 
 const processAuthorizationCode = (params: string): string | null => {
   const code = new URLSearchParams(params).get("code");
 
-  if (code) {
-    return encodeURI(code);
-  }
-
-  return null;
+  return code ? encodeURI(code) : null;
 };
 
 const hasAuthorizationError = (params: string): boolean =>
@@ -87,7 +79,22 @@ const hasAuthorizationError = (params: string): boolean =>
 const hasAuthorizationSuccess = (params: string): boolean =>
   processAuthorizationCode(params) !== null;
 
-export const login = (): void => {
+const requestAccessToken = async (code: string): Promise<Result<void>> => {
+  try {
+    const result = await authenticate(code);
+
+    if (result.accessToken === undefined)
+      return new Failure("Got an invalid access token!");
+
+    save(result.accessToken, result.refreshToken);
+
+    return new Success();
+  } catch (e) {
+    return new Failure("Got an invalid access token!");
+  }
+};
+
+export const login = async (): Promise<void> => {
   if (hasAuthorizationError(window.location.search)) {
     console.log("User refused to authenticate :(");
     return;
@@ -102,20 +109,24 @@ export const login = (): void => {
   const authorizationCode = processAuthorizationCode(window.location.search);
   if (authorizationCode === null) return;
 
-  authenticate(authorizationCode)
-    .then((tokens) => {
-      if (tokens.accessToken != undefined) {
-        save(tokens.accessToken, tokens.refreshToken);
-        window.location.replace(import.meta.env.VITE_HOSTURL);
-      }
-    })
-    .catch((exception) => {
-      console.log(
-        `Failed to exchange authorization for authentication token ${exception}`
-      );
-    });
+  const result = await requestAccessToken(authorizationCode);
+
+  if (result instanceof Success) {
+    window.location.replace(import.meta.env.VITE_HOSTURL);
+    return;
+  }
+
+  console.log(`Failed to exchange authorization for authentication token`);
 };
 
 export const isLoggedIn = (): boolean => get(storedAccessToken) !== null;
 
-export const token = (): string => get(storedAccessToken);
+export const refreshToken = async (): Promise<Result<void>> => {
+  const refreshToken = get(storedRefreshToken);
+
+  if (refreshToken === null) return new Failure("No refresh token stored");
+
+  return await requestAccessToken(refreshToken);
+};
+
+export const token = (): string | null => get(storedAccessToken);
