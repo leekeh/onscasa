@@ -68,9 +68,6 @@ const processAuthorizationCode = (params: string): string | null => {
 const hasAuthorizationError = (params: string): boolean =>
   new URLSearchParams(params).get("error") !== null;
 
-const hasAuthorizationSuccess = (params: string): boolean =>
-  processAuthorizationCode(params) !== null;
-
 const requestAccessToken = async (code: string): Promise<Result<void>> => {
   try {
     const result = await authenticate(code);
