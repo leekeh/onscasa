@@ -1,1 +1,1 @@
-export { createGenericStore, createSecureStore } from "./store";
+export { createGenericStore, createSecureStore } from "./store.svelte";

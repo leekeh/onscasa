@@ -1,10 +1,9 @@
 import { createSecureStore } from "@storage";
-import { get } from "svelte/store";
 import type { AuthenticationResponse } from "./dtos/AuthenticationResponse";
 import { Result, Failure, Success } from "@util";
 
-const storedAccessToken = createSecureStore<string>("access_token", null);
-const storedRefreshToken = createSecureStore<string>("refresh_token", null);
+const storedAccessToken = createSecureStore<string>("access_token");
+const storedRefreshToken = createSecureStore<string>("refresh_token");
 
 // Scopes must match the scopes configured in the Google Developers Console.
 const SCOPES = ["https://www.googleapis.com/auth/photoslibrary.readonly"].join(
@@ -109,11 +108,11 @@ export const processLoginResponse = async (): Promise<void> => {
 export const isLoggedIn = (): boolean => token() !== null;
 
 export const refreshToken = async (): Promise<Result<void>> => {
-  const refreshToken = get(storedRefreshToken);
+  const refreshToken = storedRefreshToken.state;
 
   if (refreshToken === null) return new Failure("No refresh token stored");
 
   return await requestAccessToken(refreshToken);
 };
 
-export const token = (): string | null => get(storedAccessToken);
+export const token = (): string | null => storedAccessToken.state;
