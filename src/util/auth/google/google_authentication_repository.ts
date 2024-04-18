@@ -1,6 +1,6 @@
 import { createSecureStore } from "@storage";
-import type { AuthenticationResponse } from "./dtos/AuthenticationResponse";
-import { Result, Failure, Success } from "@util";
+import type { AuthenticationResponse } from "./types";
+import { Result, Failure, Success } from "@types";
 
 const storedAccessToken = createSecureStore<string>("access_token");
 const storedRefreshToken = createSecureStore<string>("refresh_token");

@@ -13,7 +13,7 @@
       "@icons": ["./src/icons/"],
       "@auth": ["./src/util/auth/"],
       "@storage": ["./src/util/storage/"],
-      "@util": ["./src/util"]
+      "@types": ["./src/util/types"]
     }
   },
   "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],

@@ -3,4 +3,4 @@ export {
   processLoginResponse as processGoogleAccountLogin,
   isLoggedIn as isLoggedIntoGoogleAccount,
   token as GoogleToken,
-} from "./google_authentication_repository";
+} from "./google/google_authentication_repository";
