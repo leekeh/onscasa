@@ -1,11 +1,6 @@
-import {
-  login,
-  processLoginResponse,
-  isLoggedIn,
-  token,
+export {
+  login as loginIntoGoogleAccount,
+  processLoginResponse as processGoogleAccountLogin,
+  isLoggedIn as isLoggedIntoGoogleAccount,
+  token as GoogleToken,
 } from "./google_authentication_repository";
-
-export const loginIntoGoogleAccount = () => login();
-export const processGoogleAccountLogin = () => processLoginResponse();
-export const isLoggedIntoGoogleAccount = () => isLoggedIn();
-export const GoogleToken = () => token();
